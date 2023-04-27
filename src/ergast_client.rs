@@ -1,10 +1,8 @@
 use reqwest::{Client, Error};
-
-const ERGAST_BASE_API_URL: &str = "https://ergast.com/api/f1";
-
 use serde::{Deserialize, Serialize};
 // use chrono::prelude::*;
 
+const ERGAST_BASE_API_URL: &str = "https://ergast.com/api/f1";
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -100,4 +98,3 @@ pub async fn get_season_data(year: u32) -> Result<Vec<Race>, Error> {
 
     Ok(race_data)
 }
-
