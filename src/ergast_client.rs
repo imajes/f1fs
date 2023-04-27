@@ -3,21 +3,21 @@ use reqwest::{Client, Error};
 const ERGAST_BASE_API_URL: &str = "https://ergast.com/api/f1";
 
 use serde::{Deserialize, Serialize};
-use chrono::prelude::*;
+// use chrono::prelude::*;
 
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventWhen {
-    pub date: DateTime<Utc>,
-    pub time: DateTime<Utc>,
+    pub date: String, //DateTime<Utc>,
+    pub time: String, //DateTime<Utc>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Location {
-    pub lat: f64,
-    pub long: f64,
+    pub lat: String,
+    pub long: String,
     pub locality: String,
     pub country: String,
 }
@@ -28,37 +28,39 @@ pub struct Circuit {
     pub circuit_id: String,
     pub url: String,
     pub circuit_name: String,
+    #[serde(rename = "Location")]
     pub location: Location,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Race {
-    pub season: i32,
-    pub round: i32,
+    pub season: String, //i32,
+    pub round: String, //i32,
     pub url: String,
     pub race_name: String,
+    #[serde(rename = "Circuit")]
     pub circuit: Circuit,
-    pub date: DateTime<Utc>,
-    pub time: DateTime<Utc>,
+    pub date: String, //DateTime<Utc>,
+    pub time: String, //DateTime<Utc>,
+    #[serde(rename = "FirstPractice")]
     pub first_practice: EventWhen,
+    #[serde(rename = "SecondPractice")]
     pub second_practice: EventWhen,
-    pub third_practice: EventWhen,
+    #[serde(rename = "ThirdPractice")]
+    pub third_practice: Option<EventWhen>,
+    #[serde(rename = "Qualifying")]
     pub qualifying: EventWhen,
-    pub sprint: EventWhen,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RaceSeason {
-    pub races: Vec<Race>,
+    #[serde(rename = "Sprint")]
+    pub sprint: Option<EventWhen>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RaceTable {
-    pub season: i32,
-    pub races: RaceSeason,
+    pub season: String, //i32,
+    #[serde(rename = "Races")]
+    pub races: Vec<Race>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -67,26 +69,35 @@ pub struct MRData {
     pub xmlns: String,
     pub series: String,
     pub url: String,
-    pub limit: i32,
-    pub offset: i32,
-    pub total: i32,
-    pub race_table: RaceTable;
+    pub limit: String, //i32,
+    pub offset: String, //i32,
+    pub total: String, //i32,
+    #[serde(rename = "RaceTable")]
+    pub race_table: RaceTable,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ErgastResponse {
+    pub m_r_data: MRData,
 }
 
 #[tokio::main]
-pub async fn get_season_data(year: u32) -> Result<(), Error> {
+pub async fn get_season_data(year: u32) -> Result<Vec<Race>, Error> {
 
     let season_url = format!("{ERGAST_BASE_API_URL}/{year}.json?limit=100");
-    println!("Sending request to {:#?}", season_url);
+    println!("[DEBUG] Sending request to {:#?}", season_url);
 
-    let season_data: models::MRData = Client::new()
+    let ergast_response: ErgastResponse = Client::new()
         .get(season_url)
         .send()
         .await?
-        .text()
+        .json()
         .await?;
 
-    println!("{:#?}", season_data);
-    Ok(())
+    // dispense with the stuff we really don't need right now
+    let race_data = ergast_response.m_r_data.race_table.races;
+
+    Ok(race_data)
 }
 
