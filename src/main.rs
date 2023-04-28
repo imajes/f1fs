@@ -2,7 +2,13 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-// mod ergast_client;
+use tracing::{debug, error, info, warn, Level};
+use tracing_subscriber::FmtSubscriber;
+
+mod ergast_client;
+mod generate;
+mod relocate;
+mod watch;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -26,60 +32,57 @@ enum Commands {
     Generate {
         /// dest path to move files to
         #[arg(short, long, value_name="PATH")]
-        dest: Option<PathBuf>,
+        dest: PathBuf,
     },
 
     Relocate {
         /// source path to move files from
         #[arg(short, long, value_name="PATH")]
-        src: Option<PathBuf>,
+        src: PathBuf,
 
         /// dest path to move files to
         #[arg(short, long, value_name="PATH")]
-        dest: Option<PathBuf>,
+        dest: PathBuf,
     },
 
     Watch {
         /// source path to move files from
         #[arg(short, long, value_name="PATH")]
-        watch: Option<PathBuf>,
+        watch: PathBuf,
 
         /// dest path to move files to
         #[arg(short, long, value_name="PATH")]
-        dest: Option<PathBuf>,
+        dest: PathBuf,
     },
 }
 
-// fn get_race_data() {
-//     let race_data = match ergast_client::get_season_data(2022) {
-//         Ok(rv) => rv,
-//         Err(e) => panic!("Problem doing the thing: {:#?}", e),
-//     };
-//
-//     println!("{:#?}", race_data[0]);
-// }
-
 fn main() {
+    // a builder for `FmtSubscriber`.
+    let subscriber = FmtSubscriber::builder()
+        // all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)
+        // will be written to stdout.
+        .with_max_level(Level::TRACE)
+        // completes the builder.
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("setting default subscriber failed");
 
     let cli = Cli::parse();
-    println!("cli.command: {:#?}", cli.command);
+    debug!("cli.command: {:#?}", cli.command);
 
-    let subcommand = cli.command.as_ref();
-
-    // if subcommand == None {
-    //     println!("Help requested");
-    //     return;
-    // }
-    //
-    println!("subcommand is {:#?}", subcommand);
+    let subcommand = match cli.command {
+        Some(subcommand) => subcommand,
+        None => {
+            error!("You must enter a subcommand!");
+            std::process::exit(1);
+        },
+    };
 
     match subcommand {
-        Some(Generate) => println!("This calls the generate sub option command"),
-        Some(Relocate) => println!("This calls the relocate sub option command"),
-        Some(Watch) => println!("This calls the watch sub option command"),
-        None => println!("None - Shouldn't happen here"),
-        _ => panic!("Unrecognized command requested: {:#?}", subcommand),
+        Commands::Generate { ref dest } => generate::subcommand(dest),
+        Commands::Relocate { ref src, ref dest } => relocate::subcommand(src, dest),
+        Commands::Watch { ref watch, ref dest } => watch::subcommand(watch, dest),
+        // _ => panic!("Unrecognized command requested: {:#?}", subcommand),
     }
-
-    // get_race_data();
 }
