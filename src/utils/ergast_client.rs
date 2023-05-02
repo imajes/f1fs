@@ -1,6 +1,5 @@
 use reqwest::{Client, Error};
 use serde::{Deserialize, Serialize};
-// use chrono::prelude::*;
 
 const ERGAST_BASE_API_URL: &str = "https://ergast.com/api/f1";
 
