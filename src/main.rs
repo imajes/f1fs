@@ -2,11 +2,12 @@ extern crate simple_error;
 
 use std::error::Error;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::{Verbosity, InfoLevel};
 
-use tracing::{debug, error, info, warn, Level};
+use tracing::{debug, info, error, warn, Level};
 use tracing_subscriber::FmtSubscriber;
 
 mod utils;
@@ -19,50 +20,51 @@ struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
 
+    /// Don't do anything to the filesystem, just report what happens
+    #[arg(short, long, action = clap::ArgAction::SetTrue)]
+    dryrun: bool,
+
     /// Turn debugging information on
     #[command(flatten)]
     verbose: Verbosity<InfoLevel>,
-    // #[arg(short, long, action = clap::ArgAction::SetTrue)]
-    // verbose: bool,
-
-    /// Don't do anything, just report
-    #[arg(short, long, action = clap::ArgAction::SetTrue)]
-    dryrun: bool,
 }
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// generates folders in the destination output
+    /// Generates folders in the destination output for years asked
     Generate {
         /// years to generate folders for
         #[arg(short, long, value_name="PATH")]
         years: String,
 
-        /// dest path to move files to
+        /// destination path to move files to
         #[arg(short, long, value_name="PATH")]
         dest: PathBuf,
     },
 
+    /// Moves source files into the correct destination folders
     Relocate {
         /// source path to move files from
         #[arg(short, long, value_name="PATH")]
         src: PathBuf,
 
-        /// dest path to move files to
+        /// destination path to move files to
         #[arg(short, long, value_name="PATH")]
         dest: PathBuf,
     },
 
+    /// Check an incoming folder and run the relocation steps for new media
     Watch {
         /// source path to move files from
         #[arg(short, long, value_name="PATH")]
         watch: PathBuf,
 
-        /// dest path to move files to
+        /// destination path to move files to
         #[arg(short, long, value_name="PATH")]
         dest: PathBuf,
     },
 
+    /// Gather metadata/assets for a given season/race/event
     MetaData {
         /// type of metadata to locate/generate
         #[arg(short, long, value_name="TYPE")]
@@ -72,24 +74,32 @@ enum Commands {
         #[arg(short, long, value_name="PATH")]
         years: String,
 
-        /// dest path to move files to
+        /// destination path to move files to
         #[arg(short, long, value_name="PATH")]
         dest: PathBuf,
     }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let cli = Cli::parse();
+
+    // Handle verbosity in a log filter that's friendly to us all
+    let tracing_level_filter = Level::from_str(&cli.verbose.to_string())
+        .expect("unable to determine verbosity");
+
     let subscriber = FmtSubscriber::builder()
-        // all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)
-        // will be written to stdout.
-        .with_max_level(Level::TRACE)
+        .with_max_level(tracing_level_filter) // ignore anything more verbose than what's asked for
+        .without_time()
         .finish();
 
     tracing::subscriber::set_global_default(subscriber)
-        .expect("setting default subscriber failed");
+        .expect("setting default log subscriber failed");
 
-    let cli = Cli::parse();
-    debug!("cli.command: {:#?}", cli.command);
+
+    warn!("cli.command: {:#?}", cli.command);
+    debug!("cli.verbose log_level_filter: {:#?}", cli.verbose.log_level_filter());
+    debug!("cli.verbose get: {:#?}", cli.verbose.log_level());
+    debug!("tracing_level_filter maybe: {:#?}", tracing_level_filter);
 
     let subcommand = match cli.command {
         Some(subcommand) => subcommand,
