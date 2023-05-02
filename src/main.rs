@@ -95,11 +95,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     tracing::subscriber::set_global_default(subscriber)
         .expect("setting default log subscriber failed");
 
-
+    debug!("shut up unused_imports...");
     warn!("cli.command: {:#?}", cli.command);
-    debug!("cli.verbose log_level_filter: {:#?}", cli.verbose.log_level_filter());
-    debug!("cli.verbose get: {:#?}", cli.verbose.log_level());
-    debug!("tracing_level_filter maybe: {:#?}", tracing_level_filter);
+    warn!("cli.verbose log_level_filter: {:#?}", cli.verbose.log_level_filter());
+    warn!("cli.verbose: {:#?}", cli.verbose);
+    warn!("cli.verbose as string: {:#?}", cli.verbose.to_string());
+    warn!("tracing_level_filter maybe: {:#?}", tracing_level_filter);
 
     let subcommand = match cli.command {
         Some(subcommand) => subcommand,

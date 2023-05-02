@@ -83,7 +83,7 @@ pub struct ErgastResponse {
 pub async fn get_season_data(year: u32) -> Result<Vec<Race>, Error> {
 
     let season_url = format!("{ERGAST_BASE_API_URL}/{year}.json?limit=100");
-    tracing::debug!("Sending request to {:#?}", season_url);
+    tracing::info!("Sending request to {:#?}", season_url);
 
     let ergast_response: ErgastResponse = Client::new()
         .get(season_url)

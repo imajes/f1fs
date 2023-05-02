@@ -12,7 +12,7 @@ fn get_race_data() {
         Err(e) => panic!("Problem doing the thing: {:#?}", e),
     };
 
-    println!("{:#?}", race_data[0]);
+    tracing::debug!("{:#?}", race_data[0]);
 }
 
 pub fn subcommand(years: &String, dest: &PathBuf) -> GenerateResult<bool> {
