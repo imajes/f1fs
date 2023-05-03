@@ -223,6 +223,7 @@ dependencies = [
  "simple-error",
  "tokio",
  "tracing",
+ "tracing-log",
  "tracing-subscriber",
 ]
 

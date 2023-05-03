@@ -2,12 +2,12 @@ extern crate simple_error;
 
 use std::error::Error;
 use std::path::PathBuf;
-use std::str::FromStr;
 
 use clap::{Parser, Subcommand};
-use clap_verbosity_flag::{Verbosity, InfoLevel};
+use clap_verbosity_flag::Verbosity;
 
-use tracing::{debug, info, error, warn, Level};
+use tracing::{trace, debug, info, error};
+use tracing_log::AsTrace;
 use tracing_subscriber::FmtSubscriber;
 
 mod utils;
@@ -26,7 +26,7 @@ struct Cli {
 
     /// Turn debugging information on
     #[command(flatten)]
-    verbose: Verbosity<InfoLevel>,
+    verbose: Verbosity,
 }
 
 #[derive(Subcommand, Debug)]
@@ -83,24 +83,19 @@ enum Commands {
 fn main() -> Result<(), Box<dyn Error>> {
     let cli = Cli::parse();
 
-    // Handle verbosity in a log filter that's friendly to us all
-    let tracing_level_filter = Level::from_str(&cli.verbose.to_string())
-        .expect("unable to determine verbosity");
-
+    // let subscriber = tracing_subscriber::fmt()
     let subscriber = FmtSubscriber::builder()
-        .with_max_level(tracing_level_filter) // ignore anything more verbose than what's asked for
+        .with_max_level(cli.verbose.log_level_filter().as_trace()) // ignore anything more verbose than what's asked for
         .without_time()
         .finish();
 
     tracing::subscriber::set_global_default(subscriber)
         .expect("setting default log subscriber failed");
 
-    debug!("shut up unused_imports...");
-    warn!("cli.command: {:#?}", cli.command);
-    warn!("cli.verbose log_level_filter: {:#?}", cli.verbose.log_level_filter());
-    warn!("cli.verbose: {:#?}", cli.verbose);
-    warn!("cli.verbose as string: {:#?}", cli.verbose.to_string());
-    warn!("tracing_level_filter maybe: {:#?}", tracing_level_filter);
+    debug!("cli.command: {:#?}", cli.command);
+    trace!("cli.verbose: {:#?}", cli.verbose);
+    trace!("cli.verbose.log_level_filter: {:#?}", cli.verbose.log_level_filter());
+    trace!("cli.verbose.log_level_filter.as_trace: {:#?}", cli.verbose.log_level_filter().as_trace());
 
     let subcommand = match cli.command {
         Some(subcommand) => subcommand,
