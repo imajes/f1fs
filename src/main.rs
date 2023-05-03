@@ -1,5 +1,3 @@
-extern crate simple_error;
-
 use std::error::Error;
 use std::path::PathBuf;
 
@@ -10,7 +8,7 @@ use tracing::{trace, debug, info, error};
 use tracing_log::AsTrace;
 use tracing_subscriber::FmtSubscriber;
 
-mod utils;
+// mod utils;
 mod subcommands;
 
 #[derive(Parser, Debug)]
@@ -33,7 +31,7 @@ struct Cli {
 enum Commands {
     /// Generates folders in the destination output for years asked
     Generate {
-        /// years to generate folders for
+        /// years to generate folders for. Accepts ranges(-) and solo(,): e.g. 1980-2000,2020
         #[arg(short, long, value_name="PATH")]
         years: String,
 
