@@ -40,14 +40,15 @@ pub struct Race {
     pub circuit: Circuit,
     pub date: String, //DateTime<Utc>,
     pub time: String, //DateTime<Utc>,
+    // these started appearing from 2022 onwards
     #[serde(rename = "FirstPractice")]
-    pub first_practice: EventWhen,
+    pub first_practice: Option<EventWhen>,
     #[serde(rename = "SecondPractice")]
-    pub second_practice: EventWhen,
+    pub second_practice: Option<EventWhen>,
     #[serde(rename = "ThirdPractice")]
     pub third_practice: Option<EventWhen>,
     #[serde(rename = "Qualifying")]
-    pub qualifying: EventWhen,
+    pub qualifying: Option<EventWhen>,
     #[serde(rename = "Sprint")]
     pub sprint: Option<EventWhen>,
 }
@@ -80,7 +81,7 @@ pub struct ErgastResponse {
 }
 
 #[tokio::main]
-pub async fn get_season_data(year: u32) -> Result<Vec<Race>, Error> {
+pub async fn get_season_data(year: &usize) -> Result<RaceTable, Error> {
 
     let season_url = format!("{ERGAST_BASE_API_URL}/{year}.json?limit=100");
     tracing::info!("Sending request to {:#?}", season_url);
@@ -93,7 +94,7 @@ pub async fn get_season_data(year: u32) -> Result<Vec<Race>, Error> {
         .await?;
 
     // dispense with the stuff we really don't need right now
-    let race_data = ergast_response.m_r_data.race_table.races;
+    let race_data = ergast_response.m_r_data.race_table;
 
     Ok(race_data)
 }

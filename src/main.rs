@@ -1,5 +1,6 @@
-use std::error::Error;
 use std::path::PathBuf;
+
+use anyhow::{Result};
 
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
@@ -8,7 +9,7 @@ use tracing::{trace, debug, info, error};
 use tracing_log::AsTrace;
 use tracing_subscriber::FmtSubscriber;
 
-// mod utils;
+mod utils;
 mod subcommands;
 
 #[derive(Parser, Debug)]
@@ -78,10 +79,9 @@ enum Commands {
     }
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    // let subscriber = tracing_subscriber::fmt()
     let subscriber = FmtSubscriber::builder()
         .with_max_level(cli.verbose.log_level_filter().as_trace()) // ignore anything more verbose than what's asked for
         .without_time()
@@ -108,10 +108,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         Commands::Relocate { ref src, ref dest } => subcommands::relocate::subcommand(src, dest),
         Commands::Watch { ref watch, ref dest } => subcommands::watch::subcommand(watch, dest),
         Commands::MetaData { ref kind, ref years, ref dest } => subcommands::metadata::subcommand(kind, years, dest),
-        // _ => panic!("Unrecognized command requested: {:#?}", subcommand),
     };
 
-    info!("Command result is {:#?}", cmd_result);
+    // specifics on how to fully customize error display available here:
+    // https://docs.rs/anyhow/latest/anyhow/struct.Error.html
+    match cmd_result {
+        Ok(_cmd_result) => info!("Command completed successfully."),
+        Err(cmd_result) => info!("Request failed with this error:\n\n {:?}", cmd_result),
+    };
 
     return Ok(());
 }
