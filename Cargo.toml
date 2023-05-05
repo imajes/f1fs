@@ -1,7 +1,7 @@
 [package]
 name = "f1fs"
 description = "A multi step tool to handle ideal filesystem structures for Formula 1 on Plex."
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 repository = "https://github.com/imajes/f1fs"
 license = "MIT"
