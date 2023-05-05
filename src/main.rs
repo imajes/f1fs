@@ -43,6 +43,10 @@ enum Commands {
 
     /// Moves source files into the correct destination folders
     Relocate {
+        /// years to generate folders for. Accepts ranges(-) and solo(,): e.g. 1980-2000,2020
+        #[arg(short, long, value_name="PATH")]
+        years: String,
+
         /// source path to move files from
         #[arg(short, long, value_name="PATH")]
         src: PathBuf,
@@ -105,7 +109,7 @@ fn main() -> Result<()> {
 
     let cmd_result = match subcommand {
         Commands::Generate { ref years, ref dest } => subcommands::generate::subcommand(years, dest),
-        Commands::Relocate { ref src, ref dest } => subcommands::relocate::subcommand(src, dest),
+        Commands::Relocate { ref years, ref src, ref dest } => subcommands::relocate::subcommand(years, src, dest),
         Commands::Watch { ref watch, ref dest } => subcommands::watch::subcommand(watch, dest),
         Commands::MetaData { ref kind, ref years, ref dest } => subcommands::metadata::subcommand(kind, years, dest),
     };
@@ -119,3 +123,4 @@ fn main() -> Result<()> {
 
     return Ok(());
 }
+
