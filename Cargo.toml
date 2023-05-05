@@ -3,6 +3,10 @@ name = "f1fs"
 description = "A multi step tool to handle ideal filesystem structures for Formula 1 on Plex."
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/imajes/f1fs"
+license = "MIT"
+keywords = ["media", "files", "filesystem", "plex", "formula1"]
+categories = ["command-line-utilities", "filesystem", "multimedia::video"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
