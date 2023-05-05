@@ -39,7 +39,7 @@ pub struct Race {
     #[serde(rename = "Circuit")]
     pub circuit: Circuit,
     pub date: String, //DateTime<Utc>,
-    pub time: String, //DateTime<Utc>,
+    pub time: Option<String>, //DateTime<Utc>,
     // these started appearing from 2022 onwards
     #[serde(rename = "FirstPractice")]
     pub first_practice: Option<EventWhen>,
