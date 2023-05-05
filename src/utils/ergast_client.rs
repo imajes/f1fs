@@ -6,8 +6,8 @@ const ERGAST_BASE_API_URL: &str = "https://ergast.com/api/f1";
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EventWhen {
-    pub date: String, //DateTime<Utc>,
-    pub time: String, //DateTime<Utc>,
+    pub date: Option<String>, //DateTime<Utc>,
+    pub time: Option<String>, //DateTime<Utc>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
