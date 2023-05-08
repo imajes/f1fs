@@ -20,8 +20,8 @@ struct Cli {
     command: Option<Commands>,
 
     /// Don't do anything to the filesystem, just report what happens
-    #[arg(short, long, action = clap::ArgAction::SetTrue)]
-    dryrun: bool,
+    // #[arg(short, long, action = clap::ArgAction::SetTrue)]
+    // dryrun: bool,
 
     /// Turn debugging information on
     #[command(flatten)]
