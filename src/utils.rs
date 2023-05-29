@@ -1,11 +1,9 @@
-use std::error::Error;
-
 use anyhow::{Context, Result};
 use number_range::NumberRangeOptions;
 
 pub mod ergast_client;
 
-pub fn parse_years(years: &String) -> Result<Vec<usize>, Box<dyn Error>>{
+pub fn parse_years(years: &String) -> Result<Vec<usize>, anyhow::Error>{
     let year_range = NumberRangeOptions::<usize>::new()
         .with_list_sep(',')
         .with_range_sep('-')

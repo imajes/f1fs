@@ -1,15 +1,12 @@
 use std::path::{PathBuf};
-use std::error::Error;
 use std::fs;
 
-use anyhow::{Context, Result};
+use anyhow::{Context};
 
 use crate::utils::*;
 use crate::utils::ergast_client::*;
 
-pub type GenerateResult<T> = Result<T, Box<dyn Error>>;
-
-pub fn subcommand(years: &String, dest: &PathBuf) -> GenerateResult<bool> {
+pub fn subcommand(years: &String, dest: &PathBuf) -> anyhow::Result<()> {
     tracing::info!("Generating folders in {:#?} for the following years: {:#?}", dest.display(), years);
 
     tracing::debug!("dest folder exists? {:#?}", dest.exists());
@@ -26,10 +23,10 @@ pub fn subcommand(years: &String, dest: &PathBuf) -> GenerateResult<bool> {
         };
     };
 
-    return Ok(true);
+    return Ok(());
 }
 
-fn process_year(year: &usize, dest: &PathBuf) -> GenerateResult<bool> {
+fn process_year(year: &usize, dest: &PathBuf) -> anyhow::Result<()> {
 
     let year_folder = format!("Season {}", year);
     let year_path = dest.join(year_folder);
@@ -59,5 +56,5 @@ fn process_year(year: &usize, dest: &PathBuf) -> GenerateResult<bool> {
         }
     }
 
-    return Ok(true);
+    return Ok(());
 }
